@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { updateStatus } from '../services/statusService'; // Updated imports
+import { getStatus } from '../services/statusManager'; // Updated imports
 
 // SSE endpoint to stream match status updates
 /*
@@ -77,7 +77,7 @@ export const matchStatusStream = (req: Request, res: Response) => {
     const interval = setInterval(async () => {
         try {
             // Call the updateStatus function to get the latest status
-            const statusMessage = await updateStatus(userId);
+            const statusMessage = await getStatus(userId);
 
             // Send the status message to the client
             sendEvent({ status: 'update', message: statusMessage });

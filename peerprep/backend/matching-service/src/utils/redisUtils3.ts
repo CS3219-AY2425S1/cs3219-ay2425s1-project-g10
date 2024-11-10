@@ -132,16 +132,24 @@ export const clearExpiredQueue = async () => {
                 }
                 */
               // Remove expired entries from queue1 key
-              const removedCount = await redisClient.zremrangebyscore(key, 0, expiredTime15);
-              console.log(`Removed ${removedCount} expired entries from ${key}`);
+              const rem_count = expiredEntries.length / 2
+              const transaction = redisClient.multi();
+              transaction.zremrangebyscore(key, 0, expiredTime15);
+              console.log(`Removing ${rem_count} expired entries from ${key}`);
 
               // Add expired entries to queue2, preserving their expiry time
               const newKey = `queue2:${topic}`;
               for (let i = 0; i < expiredEntries.length; i += 2) {
                 const userId = expiredEntries[i];
                 const originalExpiryTime = expiredEntries[i + 1];
-                await redisClient.zadd(newKey, originalExpiryTime, userId);
-                console.log(`Added expired entry ${userId} to ${newKey} with expiry time ${originalExpiryTime}`);
+                transaction.zadd(newKey, originalExpiryTime, userId);
+                console.log(`Adding expired entry ${userId} to ${newKey} with expiry time ${originalExpiryTime}`);
+              }
+              try {
+                await transaction.exec();
+                console.log(`Transaction executed!`);
+              } catch {
+                console.error("Error in executing transaction");
               }
             }
         }
@@ -150,13 +158,23 @@ export const clearExpiredQueue = async () => {
         const scanResult2 = await redisClient.scan(cursor, "MATCH", patternQueue2, "COUNT", 100);
         cursor = scanResult2[0]; // Update cursor position
         const queue2Keys = scanResult2[1]; // List of queue2 keys
+        const transaction = redisClient.multi();
     
         // Just remove expired entries from queue2 keys
         for (const key of queue2Keys) {
-            const removedCount = await redisClient.zremrangebyscore(key, 0, expiredTime);
+            transaction.zremrangebyscore(key, 0, expiredTime);
+        }
+        try {
+          const result = await transaction.exec();
+          if (result) {
+            const removedCount = (result as number[][]).map((res) => res[1]).reduce((acc, val) => acc + val, 0);
             if (removedCount > 0) {
-                console.log(`Removed ${removedCount} expired entries from ${key}`);
+              console.log(`Removed ${removedCount} expired entries`);
+              console.log(`Transaction executed!`);
             }
+          }
+        } catch {
+          console.log('Error in removing expired entries')
         }
     
       } while (cursor !== "0"); // Continue until cursor returns to "0"
@@ -462,6 +480,7 @@ export const getRequestStatus = async (userId: string): Promise<string> => {
       console.log("User " + userId + " is in queue: " + status);
       const duration = await getQueueDurationSeconds(userId);
       if (status) {
+
         return "Matching request pending: " + Math.trunc(duration!) + " seconds remaining";
       } else {
         return "Matching request not in queue";

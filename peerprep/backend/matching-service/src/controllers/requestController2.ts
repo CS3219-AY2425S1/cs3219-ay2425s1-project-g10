@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { addToQueue, removeFromQueue, cancelSession} from '../services/queueManager2';
+import { addToQueue, removeFromQueue} from '../services/queueManager3';
 import ReqObj from '../models/ReqObj';
 
 export const createRequest = async (req: Request, res: Response): Promise<void> => {
@@ -9,7 +9,6 @@ export const createRequest = async (req: Request, res: Response): Promise<void> 
       userId,
       topic,
       difficulty,
-      status: 'pending',
       createdAt: new Date(),
     };
   
@@ -45,17 +44,3 @@ export const deleteRequest = async (req: Request, res: Response): Promise<void> 
       res.status(500).json({ message: 'Failed to remove request from the queue due to an unknown error' });
     }
 }
-
-// API to delete a session
-export const deleteSession = async (req: Request, res: Response): Promise<void> => {
-  const sessionId = req.params.sessionId as string; // Get userId from URL parameters
-
-  try {
-    // Cancel the timeout and remove session from Redis
-    await cancelSession(sessionId);
-    res.status(200).json({ message: 'Session successfully deleted' });
-  } catch (error) {
-    console.error("Error in deleteSession:", error);
-    res.status(500).json({ message: 'Failed to delete session due to an unknown error' });
-  }
-};
