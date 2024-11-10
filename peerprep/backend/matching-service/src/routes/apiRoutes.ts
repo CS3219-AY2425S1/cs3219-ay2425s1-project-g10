@@ -1,5 +1,6 @@
 import express from 'express';
-import { createRequest, deleteRequest, deleteSession } from '../controllers/requestController2';
+import { createRequest, deleteRequest} from '../controllers/requestController2';
+import { deleteSession } from '../controllers/sessionController';
 import { matchStatusStream } from '../controllers/sseController'; // Import your SSE handler
 
 const router = express.Router();
