@@ -207,6 +207,8 @@ const CollaborationServiceIntegratedView: React.FC = () => {
         return;
       }
 
+      setOutput('Executing code...');
+
       const currentCode = yText.toString();
       console.log('Submitting code for execution:', currentCode);
 
@@ -289,9 +291,9 @@ const CollaborationServiceIntegratedView: React.FC = () => {
 
   return (
     <div className="h-screen w-screen bg-gray-50 p-4 flex overflow-hidden">
-      <div className="left-panel  h-full flex flex-col" style={{ width: `${leftPaneWidth}%` }}>
+      <div className="left-pane  h-full flex flex-col" style={{ width: `${leftPaneWidth}%` }}>
         <div className="question-info space-y-4 overflow-y-auto p-4 rounded-md border border-gray-200 flex-grow" style={{ height: `${chatHeight}%` }}>
-          <h2 className="text-2xl font-medium text-gray-900">Q. {questionTitle}</h2>
+          <h2 className="text-2xl font-bold text-gray-900">Q. {questionTitle}</h2>
 
           <div className="flex gap-2 flex-col sm:flex-row">
             {topics && (
@@ -354,12 +356,12 @@ const CollaborationServiceIntegratedView: React.FC = () => {
         <GripVertical className="text-gray-400" size={40} />
       </div>
 
-      <div className="right-panel flex-1 h-full">
+      <div className="right-pane flex-1 h-full">
         <div className="coding-area flex flex-col rounded-md border border-gray-200" style={{ height: `${codeEditorHeight}%` }}>
           <div className="top-portion flex-none px-2 py-1 flex items-center bg-slate-200 justify-between">
             <div className='flex-none gap-1 flex'>
               <Code2 size={18} className="text-gray-600" />
-              <h3 className="text-sm font-medium text-gray-900">Code</h3>
+              <h3 className="text-sm font-bold text-gray-900">Code</h3>
             </div>
             <button
               onClick={handleLeaveSession}
