@@ -48,11 +48,17 @@ const CollaborationServiceIntegratedView: React.FC = () => {
 
   const [leftPaneWidth, setLeftPaneWidth] = useState(35);
   const [codeEditorHeight, setCodeEditorHeight] = useState(90);
+  const [chatHeight, setChatHeight] = useState(80);
+
 
   interface ResizeEvent extends MouseEvent {
     clientX: number;
   }
   interface VerticalResizeEvent extends MouseEvent {
+    clientY: number;
+  }
+
+  interface ChatResizeEvent extends MouseEvent {
     clientY: number;
   }
   interface ContainerRect {
@@ -87,6 +93,24 @@ const CollaborationServiceIntegratedView: React.FC = () => {
     const handleResize = (moveEvent: VerticalResizeEvent): void => {
       const newHeight = ((moveEvent.clientY - containerRect.top) / containerRect.height) * 100;
       setCodeEditorHeight(Math.min(Math.max(30, newHeight), 90)); // Limit between 30% and 90%
+    };
+
+    const removeListeners = (): void => {
+      document.removeEventListener('mousemove', handleResize);
+      document.removeEventListener('mouseup', removeListeners);
+    };
+
+    document.addEventListener('mousemove', handleResize);
+    document.addEventListener('mouseup', removeListeners);
+  };
+
+  const handleChatResize = (e: React.MouseEvent<HTMLDivElement, MouseEvent>): void => {
+    const container = e.currentTarget.parentElement as HTMLDivElement;
+    const containerRect: ContainerRect = container.getBoundingClientRect();
+
+    const handleResize = (moveEvent: ChatResizeEvent): void => {
+      const newHeight = ((moveEvent.clientY - containerRect.top) / containerRect.height) * 100;
+      setChatHeight(Math.min(Math.max(40, newHeight), 90));
     };
 
     const removeListeners = (): void => {
@@ -265,66 +289,74 @@ const CollaborationServiceIntegratedView: React.FC = () => {
 
   return (
     <div className="h-screen w-screen bg-gray-50 p-4 flex overflow-hidden">
-      <div className="left-panel bg-white rounded-md border border-gray-200"
-        style={{ width: `${leftPaneWidth}%` }}
-      >
-        <div className="h-full p-6">
-          <div className="question-info space-y-4">
-            <h2 className="text-2xl font-medium text-gray-900">Q. {questionTitle}</h2>
+      <div className="left-panel  h-full flex flex-col" style={{ width: `${leftPaneWidth}%` }}>
+        <div className="question-info space-y-4 overflow-y-auto p-4 rounded-md border border-gray-200 flex-grow" style={{ height: `${chatHeight}%` }}>
+          <h2 className="text-2xl font-medium text-gray-900">Q. {questionTitle}</h2>
 
-            <div className="flex gap-2">
-              {topics && (
-                <span className="px-3 py-1 text-sm rounded-full bg-gray-100 text-gray-700">
-                  {topics}
-                </span>
-              )}
-              {difficulty && (
-                <span className="px-3 py-1 text-sm rounded-full bg-gray-100 text-gray-700">
-                  {difficulty}
-                </span>
-              )}
-            </div>
-
-            <p className="text-gray-700 leading-relaxed">{questionDescription}</p>
+          <div className="flex gap-2 flex-col sm:flex-row">
+            {topics && (
+              <span className="px-3 py-1 text-sm rounded-full bg-gray-100 text-gray-700">
+                {topics}
+              </span>
+            )}
+            {difficulty && (
+              <span className="px-3 py-1 text-sm rounded-full bg-gray-100 text-gray-700">
+                {difficulty}
+              </span>
+            )}
           </div>
+
+          <p className="text-gray-700 leading-relaxed">{questionDescription}</p>
 
           <div className="test-cases mt-8">
-            <h3 className="font-medium text-lg text-gray-900 mb-4">Test Cases</h3>
-            <div className="">
-              <table className="w-full border-collapse">
-                <thead>
-                  <tr className="bg-gray-50">
-                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-700 border border-gray-200">Input 1</th>
-                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-700 border border-gray-200">Output 1</th>
-                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-700 border border-gray-200">Input 2</th>
-                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-700 border border-gray-200">Output 2</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td className="px-4 py-2 text-sm text-gray-700 border border-gray-200">{input1}</td>
-                    <td className="px-4 py-2 text-sm text-gray-700 border border-gray-200">{output1}</td>
-                    <td className="px-4 py-2 text-sm text-gray-700 border border-gray-200">{input2}</td>
-                    <td className="px-4 py-2 text-sm text-gray-700 border border-gray-200">{output2}</td>
-                  </tr>
-                </tbody>
-              </table>
+            <h3 className="font-medium text-lg text-gray-900 mb-1">Test Cases</h3>
+
+            <div className="mb-4">
+              <h4 className="font-medium text-base text-gray-800">Test Case 1:</h4>
+              <p className="text-sm text-gray-700">
+                <span className="font-semibold">Input:</span> {input1}
+              </p>
+              <p className="text-sm text-gray-700">
+                <span className="font-semibold">Output:</span> {output1}
+              </p>
+            </div>
+
+            <div className="mb-4">
+              <h4 className="font-medium text-base text-gray-800">Test Case 2:</h4>
+              <p className="text-sm text-gray-700">
+                <span className="font-semibold">Input:</span> {input2}
+              </p>
+              <p className="text-sm text-gray-700">
+                <span className="font-semibold">Output:</span> {output2}
+              </p>
             </div>
           </div>
-
-          {sessionId && <Chat sessionId={sessionId.replace("matched on Session ID: ", "")} />}
         </div>
+
+        {/* Chat section fixed at the bottom */}
+        {sessionId && (<>
+          <div
+            className="resizer h-2 cursor-row-resize flex items-center justify-center hover:bg-gray-200 active:bg-gray-300 transition-colors rounded-full"
+            onMouseDown={handleChatResize}
+          >
+            <GripHorizontal className="text-gray-400" size={10} />
+          </div>
+          <div className="chat-section rounded-md border p-4  border-t border-gray-200 pt-4" style={{ height: `${100 - chatHeight}%`}}>
+            <Chat sessionId={sessionId.replace("matched on Session ID: ", "")} />
+          </div>
+        </>
+        )}
       </div>
 
-      <div className="resizer w-2 cursor-col-resize flex items-center justify-center hover:bg-gray-200 active:bg-gray-300 transition-colors"
-        onMouseDown={handleHorizontalResize}
-      >
+
+      <div className="resizer w-2 cursor-col-resize flex items-center justify-center hover:bg-gray-200 active:bg-gray-300 transition-colors rounded-full"
+        onMouseDown={handleHorizontalResize}>
         <GripVertical className="text-gray-400" size={40} />
       </div>
 
-      <div className="right-panel flex-1 bg-white">
+      <div className="right-panel flex-1 h-full">
         <div className="coding-area flex flex-col rounded-md border border-gray-200" style={{ height: `${codeEditorHeight}%` }}>
-          <div className="top-portion flex-none px-2 py-1 border-b border-gray-200 flex items-center bg-slate-200 justify-between">
+          <div className="top-portion flex-none px-2 py-1 flex items-center bg-slate-200 justify-between">
             <div className='flex-none gap-1 flex'>
               <Code2 size={18} className="text-gray-600" />
               <h3 className="text-sm font-medium text-gray-900">Code</h3>
@@ -356,7 +388,7 @@ const CollaborationServiceIntegratedView: React.FC = () => {
                 <option value="78">Kotlin</option>
               </select>
               <div className="pointer-events-none absolute top-1 right-3 flex items-center text-gray-500">
-              ⌄
+                ⌄
               </div>
             </div>
 
@@ -414,14 +446,14 @@ const CollaborationServiceIntegratedView: React.FC = () => {
           </div>
         </div>
 
-        <div className="resizer h-2 cursor-row-resize flex items-center justify-center hover:bg-gray-200 active:bg-gray-300 transition-colors"
+        <div className="resizer h-2 cursor-row-resize flex items-center justify-center hover:bg-gray-200 active:bg-gray-300 transition-colors rounded-full"
           onMouseDown={handleVerticalResize}
         >
           <GripHorizontal className="text-gray-400" size={10} />
         </div>
 
-        <div className=" output-section border-t border-gray-200 rounded-md overflow-auto"
-          style={{ height: `${100 - codeEditorHeight}%` }}
+        <div className=" output-section border border-gray-200 rounded-md overflow-auto"
+          style={{ height: `${99 - codeEditorHeight}%` }}
         >
           <div className="p-4">
             <h3 className="text-sm font-medium text-gray-900 mb-2">Output</h3>
