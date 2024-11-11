@@ -4,6 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import * as Y from 'yjs';
 import Chat from './components/Chat.tsx';
+import { GripVertical, GripHorizontal, Code2 } from 'lucide-react';
 
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/theme/material.css';
@@ -22,7 +23,7 @@ import { assessCode } from '../../api/assesscodeApi.ts';
 import { CodemirrorBinding } from 'y-codemirror';
 import { WebsocketProvider } from 'y-websocket';
 
-import { deleteMatchedSession} from "../../api/matchingApi.ts";
+import { deleteMatchedSession } from "../../api/matchingApi.ts";
 import { getQuestionById } from '../../api/questionApi.ts';
 
 const CollaborationServiceIntegratedView: React.FC = () => {
@@ -34,14 +35,6 @@ const CollaborationServiceIntegratedView: React.FC = () => {
   const editorRef = useRef<any>(null);
   const navigate = useNavigate();
   const [yText, setYText] = useState<Y.Text | null>(null);
-
-  // const [commentoutput, setCommentOutput] = useState<string | null>(null);
-  // console.log(commentoutput);
-
-  //let topic = 'topic';
-  //let difficulty = 'difficulty';
-  // Declare question object
-  //extract questionID from session id (eg. 670d81daf90653ef4b9162b8-67094dcc6be97361a2e7cb1a-1730832550120-Q672890c43266d81a769bfaee)
   const [input1, setInput1] = useState<string>('N/A');
   const [output1, setOutput1] = useState<string>('N/A');
   const [input2, setInput2] = useState<string>('N/A');
@@ -52,6 +45,58 @@ const CollaborationServiceIntegratedView: React.FC = () => {
   const [questionDescription, setQuestionDescription] = useState<string>('N/A');
   console.log("session id is " + sessionId);
   const questionId = sessionId ? sessionId.split('-Q')[1] : "N/A";
+
+  const [leftPaneWidth, setLeftPaneWidth] = useState(35);
+  const [codeEditorHeight, setCodeEditorHeight] = useState(90);
+
+  interface ResizeEvent extends MouseEvent {
+    clientX: number;
+  }
+  interface VerticalResizeEvent extends MouseEvent {
+    clientY: number;
+  }
+  interface ContainerRect {
+    left: number;
+    width: number;
+    top: number;
+    height: number;
+  }
+
+  const handleHorizontalResize = (e: React.MouseEvent<HTMLDivElement, MouseEvent>): void => {
+    const container = e.currentTarget.parentElement as HTMLDivElement;
+    const containerRect: ContainerRect = container.getBoundingClientRect();
+
+    const handleResize = (moveEvent: ResizeEvent): void => {
+      const newWidth = ((moveEvent.clientX - containerRect.left) / containerRect.width) * 100;
+      setLeftPaneWidth(Math.min(Math.max(20, newWidth), 80)); // Limit between 20% and 80%
+    };
+
+    const removeListeners = (): void => {
+      document.removeEventListener('mousemove', handleResize);
+      document.removeEventListener('mouseup', removeListeners);
+    };
+
+    document.addEventListener('mousemove', handleResize);
+    document.addEventListener('mouseup', removeListeners);
+  };
+
+  const handleVerticalResize = (e: React.MouseEvent<HTMLDivElement, MouseEvent>): void => {
+    const container = e.currentTarget.parentElement as HTMLDivElement;
+    const containerRect: ContainerRect = container.getBoundingClientRect();
+
+    const handleResize = (moveEvent: VerticalResizeEvent): void => {
+      const newHeight = ((moveEvent.clientY - containerRect.top) / containerRect.height) * 100;
+      setCodeEditorHeight(Math.min(Math.max(30, newHeight), 90)); // Limit between 30% and 90%
+    };
+
+    const removeListeners = (): void => {
+      document.removeEventListener('mousemove', handleResize);
+      document.removeEventListener('mouseup', removeListeners);
+    };
+
+    document.addEventListener('mousemove', handleResize);
+    document.addEventListener('mouseup', removeListeners);
+  };
 
   //set topic, difficulty, questionId by calling the API
   useEffect(() => {
@@ -84,13 +129,6 @@ const CollaborationServiceIntegratedView: React.FC = () => {
   useEffect(() => {
     console.log(`Session ID: ${sessionId}, Topics: ${topics}, Difficulty: ${difficulty}`);
   }, [sessionId, topics, difficulty, questionId]);
-
-  useEffect(() => {
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = 'auto';
-    };
-  }, []);
 
   useEffect(() => {
     const ydoc = new Y.Doc();
@@ -126,14 +164,14 @@ const CollaborationServiceIntegratedView: React.FC = () => {
     setSyntaxFullLang(e.target.textContent!);
     setSyntaxLang(
       e.target.value === '63' ? 'javascript'
-      : e.target.value === '54' ? 'text/x-c++src'
-      : e.target.value === '50' ? 'text/x-csrc'
-      : e.target.value === '71' ? 'python'
-      : e.target.value === '62' ? 'text/x-java'
-      : e.target.value === '72' ? 'ruby'
-      : e.target.value === '51' ? 'text/x-csharp'    // New language
-      : e.target.value === '78' ? 'text/x-kotlin'    // New language
-      : 'javascript'
+        : e.target.value === '54' ? 'text/x-c++src'
+          : e.target.value === '50' ? 'text/x-csrc'
+            : e.target.value === '71' ? 'python'
+              : e.target.value === '62' ? 'text/x-java'
+                : e.target.value === '72' ? 'ruby'
+                  : e.target.value === '51' ? 'text/x-csharp'    // New language
+                    : e.target.value === '78' ? 'text/x-kotlin'    // New language
+                      : 'javascript'
     );
   };
 
@@ -197,6 +235,7 @@ const CollaborationServiceIntegratedView: React.FC = () => {
       console.error('Error executing code:', error);
       setOutput('Error executing code');
     }
+    setCodeEditorHeight(50);
   };
 
   const handleAssessCode = async () => {
@@ -221,164 +260,177 @@ const CollaborationServiceIntegratedView: React.FC = () => {
       console.error('Error executing OpenAI API call:', error);
       setOutput('Error executing code');
     }
+    setCodeEditorHeight(50);
   };
 
   return (
-    <div className="editor-container-parent">
-      <div className="editor-header">
-        <h3>Collaboration Session</h3>
-        <p>Topics: {topics} | Difficulty: {difficulty} | Question: {questionTitle}</p>
-        <p>Description: {questionDescription}</p>
+    <div className="h-screen w-screen bg-gray-50 p-4 flex overflow-hidden">
+      <div className="left-panel bg-white rounded-md border border-gray-200"
+        style={{ width: `${leftPaneWidth}%` }}
+      >
+        <div className="h-full p-6">
+          <div className="question-info space-y-4">
+            <h2 className="text-2xl font-medium text-gray-900">Q. {questionTitle}</h2>
+
+            <div className="flex gap-2">
+              {topics && (
+                <span className="px-3 py-1 text-sm rounded-full bg-gray-100 text-gray-700">
+                  {topics}
+                </span>
+              )}
+              {difficulty && (
+                <span className="px-3 py-1 text-sm rounded-full bg-gray-100 text-gray-700">
+                  {difficulty}
+                </span>
+              )}
+            </div>
+
+            <p className="text-gray-700 leading-relaxed">{questionDescription}</p>
+          </div>
+
+          <div className="test-cases mt-8">
+            <h3 className="font-medium text-lg text-gray-900 mb-4">Test Cases</h3>
+            <div className="">
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr className="bg-gray-50">
+                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-700 border border-gray-200">Input 1</th>
+                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-700 border border-gray-200">Output 1</th>
+                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-700 border border-gray-200">Input 2</th>
+                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-700 border border-gray-200">Output 2</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td className="px-4 py-2 text-sm text-gray-700 border border-gray-200">{input1}</td>
+                    <td className="px-4 py-2 text-sm text-gray-700 border border-gray-200">{output1}</td>
+                    <td className="px-4 py-2 text-sm text-gray-700 border border-gray-200">{input2}</td>
+                    <td className="px-4 py-2 text-sm text-gray-700 border border-gray-200">{output2}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {sessionId && <Chat sessionId={sessionId.replace("matched on Session ID: ", "")} />}
+        </div>
       </div>
 
-      <div className="editor-header2">
-        <button
-          onClick={handleLeaveSession}
-          className="leave-btn"
-          style={{ marginBottom: '0px' }}
-        >
-          Leave Session
-        </button>
+      <div className="resizer w-2 cursor-col-resize flex items-center justify-center hover:bg-gray-200 active:bg-gray-300 transition-colors"
+        onMouseDown={handleHorizontalResize}
+      >
+        <GripVertical className="text-gray-400" size={40} />
+      </div>
 
-        <div className="matching-form2">
-          <div>
-            <select
-              name="topic"
-              value={language}
-              onChange={
-                (e) => handleLangChange(e)
-              }
-              required
+      <div className="right-panel flex-1 bg-white">
+        <div className="coding-area flex flex-col rounded-md border border-gray-200" style={{ height: `${codeEditorHeight}%` }}>
+          <div className="top-portion flex-none px-2 py-1 border-b border-gray-200 flex items-center bg-slate-200 justify-between">
+            <div className='flex-none gap-1 flex'>
+              <Code2 size={18} className="text-gray-600" />
+              <h3 className="text-sm font-medium text-gray-900">Code</h3>
+            </div>
+            <button
+              onClick={handleLeaveSession}
+              className="px-4 py-2 bg-red-600 text-white rounded text-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
             >
-              <option value="" disabled>Select Language</option> {/* Placeholder option */}
-              <option value="63">JavaScript</option>
-              <option value="50">C</option>
-              <option value="54">C++</option>
-              <option value="51">C#</option>   {/* New language */}
-              <option value="71">Python</option>
-              <option value="62">Java</option>
-              <option value="72">Ruby</option> {/* New language */}
-              <option value="78">Kotlin</option> {/* New language */}
-            </select>
+              Leave Session
+            </button>
+          </div>
+          <div className="buttons border-b space-x-2 border-gray-200 flex px-2 py-1 items-center h-14">
+            <div className="relative md:w-48">
+              <select
+                name="topic"
+                value={language}
+                onChange={(e) => handleLangChange(e)}
+                className="w-full h-10 px-3 pr-8 rounded bg-gray-50 border border-gray-300 text-gray-600 text-sm font-medium hover:border-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 cursor-pointer appearance-none font-inherit"
+                required
+              >
+                <option value="" disabled>Select Language</option>
+                <option value="63">JavaScript</option>
+                <option value="50">C</option>
+                <option value="54">C++</option>
+                <option value="51">C#</option>
+                <option value="71">Python</option>
+                <option value="62">Java</option>
+                <option value="72">Ruby</option>
+                <option value="78">Kotlin</option>
+              </select>
+              <div className="pointer-events-none absolute top-1 right-3 flex items-center text-gray-500">
+              ⌄
+              </div>
+            </div>
+
+
+            <div className='space-x-2'>
+              <button
+                onClick={handleRunCode}
+                className="px-4 py-2 bg-green-500 text-white rounded text-sm hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+              >
+                Run
+              </button>
+              <button
+                onClick={handleAssessCode}
+                className="px-4 py-2 bg-blue-500 text-white rounded text-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              >
+                Access
+              </button>
+            </div>
+
+
+          </div>
+
+          <div className="code-editor flex-1 flex flex-col space-y-0 min-h-0">
+            <CodeMirror
+              className="h-full overflow-auto"
+              ref={editorRef}
+              options={{
+                mode: syntaxLang,
+                lineNumbers: true,
+                tabSize: 2,
+                indentWithTabs: true,
+                showHint: true,
+                extraKeys: {
+                  'Ctrl-Space': 'autocomplete',
+                },
+                hintOptions: { completeSingle: false },
+              }}
+
+              editorDidMount={(editor) => {
+                editor.on('keyup', (cm: any, event: any) => {
+                  // Only trigger autocomplete on specific characters
+                  const triggerKeys = /^[a-zA-Z0-9_]$/; // Allow letters, numbers, and underscore
+                  if (
+                    triggerKeys.test(event.key) &&
+                    !cm.state.completionActive // Ensure that completion is not already active
+                  ) {
+                    cm.showHint({ completeSingle: false });
+                  }
+                });
+              }}
+              onChange={() => {
+                // Let Yjs handle all updates; do not use setCode here
+              }}
+            />
           </div>
         </div>
-        <button
-          onClick={handleRunCode}
-          className="run-btn"
-          style={{ marginBottom: '0px' }}
-        > Run Code
-        </button>
-        <button
-          onClick={handleAssessCode}
-          className="run-btn"
-          style={{ marginBottom: '0px' }}
-        > Assess Code
-        </button>
-      </div>
 
-      <div className="code-and-chat">
-        <div className="editor-container">
-          <CodeMirror
-            ref={editorRef}
-            options={{
-              mode: syntaxLang,
-              lineNumbers: true,
-              tabSize: 2,
-              indentWithTabs: true,
-              showHint: true,
-              extraKeys: {
-                'Ctrl-Space': 'autocomplete', // Trigger autocomplete with Ctrl-Space
-              },
-              hintOptions: { completeSingle: false },
-            }}
-
-            editorDidMount={(editor) => {
-              editor.on('keyup', (cm: any, event: any) => {
-                // Only trigger autocomplete on specific characters
-                const triggerKeys = /^[a-zA-Z0-9_]$/; // Allow letters, numbers, and underscore
-                if (
-                  triggerKeys.test(event.key) &&
-                  !cm.state.completionActive // Ensure that completion is not already active
-                ) {
-                  cm.showHint({ completeSingle: false });
-                }
-              });
-            }}
-            onChange={() => {
-              // Let Yjs handle all updates; do not use setCode here
-            }}
-          />
+        <div className="resizer h-2 cursor-row-resize flex items-center justify-center hover:bg-gray-200 active:bg-gray-300 transition-colors"
+          onMouseDown={handleVerticalResize}
+        >
+          <GripHorizontal className="text-gray-400" size={10} />
         </div>
-        {sessionId && <Chat sessionId={sessionId.replace("matched on Session ID: ", "")} />}
 
+        <div className=" output-section border-t border-gray-200 rounded-md overflow-auto"
+          style={{ height: `${100 - codeEditorHeight}%` }}
+        >
+          <div className="p-4">
+            <h3 className="text-sm font-medium text-gray-900 mb-2">Output</h3>
+            <pre className="bg-gray-50 p-4 rounded text-sm text-gray-700 font-mono">{output}</pre>
+          </div>
+        </div>
       </div>
-
-      <h3 style={{ textAlign: 'left', marginBottom: '5px' }}>Output</h3>
-      <div className="output-container" style={{ width: '100%', textAlign: 'left', border: '1px solid #ddd', padding: '10px', borderRadius: '5px', backgroundColor: '#f9f9f9', overflowY: 'scroll' }}>
-
-        <pre style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}>{output}</pre>
-      </div>
-      {/*<div className="comments-container"style={{ width: '900px', textAlign: 'left', border: '1px solid #ddd', padding: '10px', borderRadius: '5px', backgroundColor: '#f9f9f9', overflowY: 'scroll'}}>
-        <pre style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}>{commentoutput}</pre>
-      </div> */}
-
-  <div className="testcases-table">
-    <h3>Test Cases</h3>
-    <table>
-      <thead>
-        <tr>
-          <th>Input 1</th>
-          <th>Output 1</th>
-          <th>Input 2</th>
-          <th>Output 2</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>{input1}</td>
-          <td>{output1}</td>
-          <td>{input2}</td>
-          <td>{output2}</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-      </div >
-    );
+    </div>
+  );
 };
 
 export default CollaborationServiceIntegratedView;
-
-/** Sample code snippets in different languages for testing */
-/** TO BE USED FOR INTERNAL TESTING WHERE REQUIRED */
-/*
-KOTLIN
-fun greet(name: String) {
-    println("Hello, $name!")
-}
-
-fun main() {
-    greet("World")
-}
-
-
-C#
-using System;
-
-class Program {
-    static void Greet(string name) {
-        Console.WriteLine("Hello, " + name + "!");
-    }
-
-    static void Main() {
-        Greet("World");
-    }
-}
-
-RUBY
-def greet(name)
-  puts "Hello, #{name}!"
-end
-
-greet("World")
-*/
