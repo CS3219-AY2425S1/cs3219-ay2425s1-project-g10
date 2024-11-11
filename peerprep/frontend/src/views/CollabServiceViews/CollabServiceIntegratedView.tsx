@@ -297,12 +297,12 @@ const CollaborationServiceIntegratedView: React.FC = () => {
 
           <div className="flex gap-2 flex-col sm:flex-row">
             {topics && (
-              <span className="px-3 py-1 text-sm rounded-full bg-gray-100 text-gray-700">
+              <span className="px-3 py-1 text-sm rounded-full bg-gray-200 text-gray-700">
                 {topics}
               </span>
             )}
             {difficulty && (
-              <span className="px-3 py-1 text-sm rounded-full bg-gray-100 text-gray-700">
+              <span className="px-3 py-1 text-sm rounded-full bg-gray-200 text-gray-700">
                 {difficulty}
               </span>
             )}
