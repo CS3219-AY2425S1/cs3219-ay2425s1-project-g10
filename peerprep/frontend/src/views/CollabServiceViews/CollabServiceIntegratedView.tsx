@@ -48,7 +48,7 @@ const CollaborationServiceIntegratedView: React.FC = () => {
 
   const [leftPaneWidth, setLeftPaneWidth] = useState(35);
   const [codeEditorHeight, setCodeEditorHeight] = useState(90);
-  const [chatHeight, setChatHeight] = useState(80);
+  const [chatHeight, setChatHeight] = useState(70);
 
 
   interface ResizeEvent extends MouseEvent {
@@ -341,7 +341,7 @@ const CollaborationServiceIntegratedView: React.FC = () => {
           >
             <GripHorizontal className="text-gray-400" size={10} />
           </div>
-          <div className="chat-section rounded-md border p-4  border-t border-gray-200 pt-4" style={{ height: `${100 - chatHeight}%`}}>
+          <div className="chat-section rounded-md border border-t border-gray-200" style={{ height: `${100 - chatHeight}%`}}>
             <Chat sessionId={sessionId.replace("matched on Session ID: ", "")} />
           </div>
         </>
