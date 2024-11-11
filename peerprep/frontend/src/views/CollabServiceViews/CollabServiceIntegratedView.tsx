@@ -459,7 +459,7 @@ const CollaborationServiceIntegratedView: React.FC = () => {
         >
           <div className="p-4">
             <h3 className="text-sm font-medium text-gray-900 mb-2">Output</h3>
-            <pre className="bg-gray-50 p-4 rounded text-sm text-gray-700 font-mono">{output}</pre>
+            <pre className="bg-white rounded-md p-4 text-sm text-gray-700 font-mono">{output}</pre>
           </div>
         </div>
       </div>
