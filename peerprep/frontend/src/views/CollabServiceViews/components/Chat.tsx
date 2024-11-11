@@ -93,8 +93,13 @@ const Chat: React.FC<ChatProps> = ({ sessionId }) => {
         {messages.map((msg, index) => (<>
           <div
             key={index}
-            className={`message max-w-[60%] rounded-md h-fit px-2 py-px ${msg.sender ? 'bg-green-200 self-end text-right' : 'bg-gray-200 self-start text-left'
+            className={`message max-w-[70%] w-fit rounded-md h-fit px-2 py-px ${msg.sender ? 'bg-green-200 self-end text-right' : 'bg-gray-200 self-start text-left'
               }`}
+            style={{
+              wordBreak: 'break-word',
+              overflowWrap: 'break-word',
+              whiteSpace: 'pre-wrap'
+            }}
           >
             {msg.text}
           </div>

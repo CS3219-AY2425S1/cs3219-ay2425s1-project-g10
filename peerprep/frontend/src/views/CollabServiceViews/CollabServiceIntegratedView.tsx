@@ -356,7 +356,7 @@ const CollaborationServiceIntegratedView: React.FC = () => {
         <GripVertical className="text-gray-400" size={40} />
       </div>
 
-      <div className="right-pane flex-1 h-full">
+      <div className="right-pane flex-1 h-full" style={{width: `${100- leftPaneWidth}%`}}>
         <div className="coding-area flex flex-col rounded-md border border-gray-200" style={{ height: `${codeEditorHeight}%` }}>
           <div className="top-portion flex-none px-2 py-1 flex items-center bg-slate-200 justify-between">
             <div className='flex-none gap-1 flex'>
@@ -455,11 +455,11 @@ const CollaborationServiceIntegratedView: React.FC = () => {
         </div>
 
         <div className=" output-section border border-gray-200 rounded-md overflow-auto"
-          style={{ height: `${99 - codeEditorHeight}%` }}
+          style={{ height: `calc(${100 - codeEditorHeight}% - 8px)` }}
         >
           <div className="p-4">
             <h3 className="text-sm font-medium text-gray-900 mb-2">Output</h3>
-            <pre className="bg-white rounded-md p-4 text-sm text-gray-700 font-mono">{output}</pre>
+            <pre className="bg-white rounded-md p-4 text-sm text-gray-700 font-mono whitespace-pre-wrap break-words">{output}</pre>
           </div>
         </div>
       </div>
