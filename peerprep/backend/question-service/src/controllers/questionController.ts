@@ -27,7 +27,7 @@ export const getQuestionById = async (req: Request, res: Response): Promise<void
 
 // Create a new question
 export const createQuestion = async (req: Request, res: Response): Promise<void> => {
-  const { title, description, categories, difficulty } = req.body;
+  const { title, description, categories, difficulty, input1, output1, input2, output2 } = req.body;
   console.log(req.body);
   try {
     // Check if a question with the same title already exists
@@ -41,7 +41,11 @@ export const createQuestion = async (req: Request, res: Response): Promise<void>
     title,
     description,
     categories,
-    difficulty
+    difficulty,
+    input1,
+    output1,
+    input2,
+    output2
   });
   console.log(newQuestion);
     // Save the new question, questionId will be auto-assigned
@@ -55,7 +59,16 @@ export const createQuestion = async (req: Request, res: Response): Promise<void>
 
 // Update a question
 export const updateQuestion = async (req: Request, res: Response): Promise<void> => {
+  const { title } = req.body;
+
   try {
+    // Check if another question with the same title exists (excluding the current question by ID)
+    const duplicateQuestion = await Question.findOne({ title, _id: { $ne: req.params.id } });
+    if (duplicateQuestion) {
+      res.status(400).json({ message: 'A question with this title already exists' });
+      return;
+    }
+
     const updatedQuestion = await Question.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true
@@ -154,3 +167,40 @@ export const getRandomQuestionByTopicAndDifficultyOld = async (topic: string, di
     throw new Error("Failed to retrieve a random question");
   }
 };
+
+// Get all unique categories
+export const getAllCategories = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const categories = await Question.distinct('categories');
+    res.status(200).json(categories);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching categories', error });
+  }
+};
+
+// Get all unique difficulties
+export const getAllDifficulties = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const difficulties = await Question.distinct('difficulty');
+    res.status(200).json(difficulties);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching difficulties', error });
+  }
+};
+
+// Check if a specific category and difficulty combination exists
+export const checkCategoryDifficultyAvailability = async (req: Request, res: Response): Promise<void> => {
+  const { category, difficulty } = req.query;
+
+  try {
+    const question = await Question.findOne({ categories: category, difficulty: difficulty });
+    if (question) {
+      res.status(200).json({ available: true });
+    } else {
+      res.status(404).json({ available: false, message: 'No question found for the specified category and difficulty.' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: 'Error checking category and difficulty availability', error });
+  }
+};
+
