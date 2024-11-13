@@ -3,8 +3,9 @@ import { findMatchInQueue } from './queueManager3';
 
 export const getStatus = async (userId: string) => {
   try {
+    redis.maintainQueue();
     const sessionId = await redis.findSessionIdByUser(userId);
-    if (sessionId) {
+    if (sessionId !== null) {
         return "Matched on Session ID: " + sessionId;
     }
 

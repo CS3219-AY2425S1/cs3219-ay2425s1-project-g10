@@ -35,7 +35,7 @@ export const findSessionIdByUser = async (
   userId: string
 ): Promise<string | null> => {
   const redisClient: Redis = app.locals.redisClient;
-  console.log("Finding session id by user" + userId);
+  //console.log("Finding session id by user" + userId);
   try {
     const sessionId = await redisClient.hget(`session:userId`, userId);
     if (!sessionId) {
@@ -259,7 +259,7 @@ export const dequeueUser = async (userId: string): Promise<void> => {
 
     if (!topic || !difficulty) {
       console.log(`User ${userId} not found in queue or missing topic/difficulty.`);
-      return;
+      throw new Error("User not found in queue or missing topic/difficulty.");
     }
 
     // Remove the user from general and topic-difficulty specific queues
@@ -381,11 +381,15 @@ const createSession = async (
     }
 
     /* RANDOM QUESTION STARTS HERE */
-    const randomQuestion = await getRandomQuestionFromQuestionService(topic, difficulty);
-    const randomQuestionTitle = randomQuestion;
-    sessionId += randomQuestionTitle
-    console.log("UPDATED Session ID:", sessionId);
-    
+    try {
+      const randomQuestion = await getRandomQuestionFromQuestionService(topic, difficulty);
+      const randomQuestionTitle = randomQuestion;
+      sessionId += randomQuestionTitle
+      console.log("UPDATED Session ID:", sessionId);
+    } catch (error) {
+      console.error("Error in createSession:", error);
+      throw error;
+    }
     const session: Session = {
       sessionId: sessionId,
       userId1,
@@ -506,7 +510,7 @@ export const findMatchInQueueByTopic = async (
     }
 
     try {
-      const sessionId = createSession(userId, userId2, topic, difficulty, difficulty2);
+      const sessionId = await createSession(userId, userId2, topic, difficulty, difficulty2);
       return sessionId;
     } catch (error) {
         console.error("Error in createSession:", error);
@@ -514,7 +518,8 @@ export const findMatchInQueueByTopic = async (
     }
   } catch (error) {
     console.error("Error in findMatchInQueueByTopic:", error);
-    throw error;
+    //throw error;
+    return null;
   }
 };
 
@@ -541,7 +546,7 @@ export const findMatchInQueueByTopicAndDifficulty = async (
       return null;
     }
     try {
-      const sessionId = createSession(userId, userId2, topic, difficulty, difficulty2);
+      const sessionId = await createSession(userId, userId2, topic, difficulty, difficulty2);
       return sessionId;
     } catch (error) {
         console.error("Error in createSession:", error);
@@ -549,6 +554,7 @@ export const findMatchInQueueByTopicAndDifficulty = async (
     }
   } catch (error) {
     console.error("Error in findMatchInQueueByTopicAndDifficulty:", error);
-    throw error;
+    //throw error;
+    return null;
   }
 };
