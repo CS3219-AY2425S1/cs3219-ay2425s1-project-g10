@@ -1,7 +1,5 @@
 #root {
   margin: 0 auto;
-  padding: 5rem;
-  text-align: center;
   background-color: white;
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -87,6 +85,7 @@ h2 {
   display: flex;
   justify-content: space-between;
   gap: 20px;
+  margin-top: 5rem;
 }
 
 .login-container {
@@ -112,6 +111,7 @@ h2 {
 
 /* Right panel for detailed view */
 .right-panel {
+  margin-right: 20px;
   flex: 1;
   max-width: 35%;
   padding: 20px;
@@ -565,136 +565,6 @@ h2 {
   transition: width 1s ease-in-out;
 }
 
-.status-message {
-  margin-top: 10px;
-  font-size: 16px;
-  color: #333;
-  font-weight: bold;
-}
-
-/* Ensure the container takes up the full page */
-.editor-container-parent {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between; /* Adjust layout */
-  align-items: center;
-
-  height: 85vh; /* Full height of the viewport */
-  width: 80vw; /* Full width of the viewport */
-  
-  overflow-y: scroll;
-  overflow-x: hidden;
-  background-color: white;
-  padding: 20px;
-  box-sizing: border-box; /* Include padding in width and height calculations */
-  scrollbar-width: none;
-}
-
-/* Hide scrollbar for Webkit browsers (Chrome, Safari) */
-.editor-container-parent::-webkit-scrollbar {
-  display: none;
-}
-
-.CodeMirror {
-  min-height: 1000px;
-  width: 100%;
-}
-
-.code-and-chat {
-  display: flex;
-  width: 100%;
-  height: 100%;
-  max-width: 900px;
-  max-height: 200px;
-  min-height: 200px;
-  flex-grow: 1;
-  position: relative;
-}
-
-.editor-container {
-  width: 70%;
-  height: 100%;
-  max-width: 900px;
-  max-height: 200px;
-  min-height: 200px;
-  flex-grow: 1;
-  border: 2px solid #ccc;
-  border-radius: 10px;
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-  background-color: white;
-  color: white;
-  
-  /* Add these properties */
-  overflow-y: auto;
-  text-align: left; /* Ensure text aligns to the left */
-  vertical-align: top; /* Ensures text starts from the top */
-}
-
-/* Hide scrollbar for Webkit browsers (Chrome, Safari) */
-.editor-container::-webkit-scrollbar {
-  display: none;
-}
-
-/* Hide scrollbar for Firefox */
-.editor-container {
-  scrollbar-width: none; /* Firefox */
-}
-
-.chat-box {
-  width: 30%;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  max-height: 200px;
-  min-height: 100px;
-  border: 2px solid #ccc;
-  border-radius: 10px;
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-  background-color: white;
-  color: black; /* Changed to black for better readability */
-}
-
-.chat-heading{
-  margin: 1px;
-}
-
-.messages {
-  font-size: small;
-  flex-grow: 1;
-  overflow-y: auto;
-  padding: 5px;
-}
-
-.message {
-  margin-bottom: 5px;
-  padding: 3px;
-  padding-left: 5px;
-  border-radius: 5px;
-  max-width: 60%;
-  overflow-x: scroll;
-  display: flex;
-}
-
-.sent {
-  background-color: #dcf8c6;
-  align-self: flex-end;
-  margin-left: auto;
-}
-
-.received {
-  background-color: #f1f0f0;
-  align-self: flex-start;
-  margin-right: auto;
-}
-
-.input-container {
-  display: flex;
-  background-color: white;
-  padding-left: 2px;
-  padding-right: 2px;
-  padding-bottom: 2px;
-}
-
 input {
   flex-grow: 1;
   padding: 5px;
@@ -704,96 +574,6 @@ input {
   margin-right: 2px;
   color: black;
   min-width: 0px;
-}
-
-.sendBtn {
-  padding: 5px 10px;
-  border: none;
-  background-color: #007bff;
-  color: white;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: small;
-}
-
-.sendBtn:hover {
-  background-color: #0056b3;
-}
-
-/* Header section styling */
-.editor-header {
-  text-align: center;
-  margin-bottom: -10px;
-  margin-top: -45px;
-}
-
-.leave-btn,
-.run-btn {
-  margin-top: 10px; /* Additional spacing if needed for each button */
-}
-
-#language-select {
-  margin-bottom: 20px;
-}
-
-/* Leave session button */
-.leave-btn {
-  background-color: #ff4d4d;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  padding: 10px 20px;
-  cursor: pointer;
-  margin-top: 10px;
-}
-
-.leave-btn:hover {
-  background-color: #ff1a1a;
-}
-
-/* Styles for the collaborative cursor to look like a blinking bar */
-.CodeMirror-cursor {
-  position: absolute;
-  width: 2px;
-  background-color: blue; /* Adjust the color per user */
-  opacity: 0.8;
-  animation: blink 1s step-end infinite; /* Blinking effect */
-}
-
-.CodeMirror-cursor {
-  border-left: 1px solid white;
-  border-right: 1px solid black;
-}
-
-/* Styles for the label (optional) */
-.CodeMirror-cursor-label {
-  position: absolute;
-  background-color: orange;
-  color: white;
-  padding: 2px 5px;
-  border-radius: 3px;
-  font-size: 12px;
-  top: -20px;
-}
-
-/* Blinking animation */
-@keyframes blink {
-  from, to {
-    opacity: 0;
-  }
-  50% {
-    opacity: 1;
-  }
-}
-
-.editor-header2 {
-  text-align: center;
-  margin-bottom: 20px;
-  margin-top: 10px;
-  display: flex;
-  flex-direction: row; /* Arrange items in a vertical stack */
-  align-items: center; /* Align items to the left */
-  gap: 60px; /* Add vertical spacing between items */
 }
 
 .matching-form2 {
@@ -873,47 +653,18 @@ input {
   text-align: center;
 }
 
-.output-container{
-  overflow-y: scroll;
-  min-height: 50px;
-  max-height: 100px;
-  max-width: 900px;
+
+/* STYLES FOR CODEMIRROR */
+.react-codemirror2 {
+  height: 100%;
+  width: 100%;
 }
 
-/* Hide scrollbar for Webkit browsers (Chrome, Safari) */
-.output-container::-webkit-scrollbar {
-  display: none;
+.CodeMirror{
+  height: 100%;
+  width: 100%;
 }
 
-/* Hide scrollbar for Firefox */
-.output-container {
-  scrollbar-width: none; /* Firefox */
-}
-
-.testcases-table {
-  margin: 20px auto; /* Center the table horizontally */
-  max-width: 900px; /* Set max width */
-  width: 100%; /* Allow the table to expand to max-width */
-}
-
-.testcases-table table {
-  border-collapse: collapse;
-  border: 2px solid #333 !important; /* Outer border around the table */
-  text-align: center;
-  width: 100%; /* Ensure the table fills the container width */
-}
-
-
-.testcases-table th, .testcases-table td {
-  border: 1px solid #333 !important; /* Border around each cell */
-  padding: 8px;
-}
-
-.testcases-table th {
-  background-color: #f2f2f2;
-  font-weight: bold;
-}
-
-.testcases-table td {
-  background-color: #fff;
+.CodeMirror-cursor{
+  height: 19px !important;
 }

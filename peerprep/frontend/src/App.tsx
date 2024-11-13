@@ -28,7 +28,6 @@ import SignUp from './views/UserServiceViews/SignUp'; // Import the new SignUp c
 import QuestionService from './views/QuestionServiceViews/QuestionManagement';
 import MatchingService from './views/MatchingServiceViews/MatchingServiceMainView';
 import SessionStubView from './views/MatchingServiceViews/SessionStubView';
-import CollaborationServiceView from './views/CollabServiceViews/CollabServiceMainView';
 import CollaborationServiceIntegratedView from './views/CollabServiceViews/CollabServiceIntegratedView';
 
 const App: React.FC = () => {
@@ -46,9 +45,6 @@ const App: React.FC = () => {
         
         {/* Public Route for Session View (Stub for now) */}
         <Route path="/sessionStub" element={<SessionStubView />} />
-
-        {/* Public Route for Collaboration Service View without sockets*/}
-        <Route path="/collab" element={<CollaborationServiceView topic={''} difficulty={''} sessionId={''} />} />
 
         {/* Public Route for Collaboration Service Integrated View */}
         <Route path="/collabFull/:sessionId" element={<CollaborationServiceIntegratedView />} />
