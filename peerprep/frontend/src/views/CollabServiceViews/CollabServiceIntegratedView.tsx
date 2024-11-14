@@ -3,7 +3,7 @@ import { UnControlled as CodeMirror } from 'react-codemirror2';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import * as Y from 'yjs';
-import Chat from '../../components/Chat.tsx';
+import Chat from './components/Chat.tsx';
 
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/theme/material.css';
@@ -12,11 +12,11 @@ import 'codemirror/addon/hint/show-hint.css';
 import 'codemirror/addon/hint/javascript-hint'; // For JavaScript hints
 
 import 'codemirror/mode/javascript/javascript'; // For JavaScript
-import 'codemirror/mode/clike/clike'; // For C, C++, Java (these use the 'clike' mode)
+import 'codemirror/mode/clike/clike'; // For C, C++, C#, Kotlin, Java (these use the 'clike' mode)
 import 'codemirror/mode/python/python'; // For Python
-import 'codemirror/mode/swift/swift'; // For Swift
+import 'codemirror/mode/ruby/ruby'; // For Ruby
 
-import { assesCode } from '../../api/assescodeApi.ts';
+import { assessCode } from '../../api/assesscodeApi.ts';
 
 // @ts-check
 import { CodemirrorBinding } from 'y-codemirror';
@@ -24,7 +24,6 @@ import { WebsocketProvider } from 'y-websocket';
 
 import { deleteMatchedSession} from "../../api/matchingApi.ts";
 import { getQuestionById } from '../../api/questionApi.ts';
-
 
 const CollaborationServiceIntegratedView: React.FC = () => {
   const { sessionId } = useParams<{ sessionId: string; }>();
@@ -35,17 +34,23 @@ const CollaborationServiceIntegratedView: React.FC = () => {
   const editorRef = useRef<any>(null);
   const navigate = useNavigate();
   const [yText, setYText] = useState<Y.Text | null>(null);
-  const [commentoutput, setCommentOutput] = useState<string | null>(null);
-  console.log(commentoutput);
+
+  // const [commentoutput, setCommentOutput] = useState<string | null>(null);
+  // console.log(commentoutput);
+
   //let topic = 'topic';
   //let difficulty = 'difficulty';
   // Declare question object
   //extract questionID from session id (eg. 670d81daf90653ef4b9162b8-67094dcc6be97361a2e7cb1a-1730832550120-Q672890c43266d81a769bfaee)
+  const [input1, setInput1] = useState<string>('N/A');
+  const [output1, setOutput1] = useState<string>('N/A');
+  const [input2, setInput2] = useState<string>('N/A');
+  const [output2, setOutput2] = useState<string>('N/A');
   const [topics, setTopics] = useState<string>('N/A');
   const [difficulty, setDifficulty] = useState<string>('N/A');
   const [questionTitle, setQuestionTitle] = useState<string>('N/A');
   const [questionDescription, setQuestionDescription] = useState<string>('N/A');
-  console.log(sessionId);
+  console.log("session id is " + sessionId);
   const questionId = sessionId ? sessionId.split('-Q')[1] : "N/A";
 
   //set topic, difficulty, questionId by calling the API
@@ -62,6 +67,10 @@ const CollaborationServiceIntegratedView: React.FC = () => {
           setDifficulty(response.difficulty); // Set difficulty from API response
           setQuestionTitle(response.title);
           setQuestionDescription(response.description);
+          setInput1(response.input1);
+          setOutput1(response.output1);
+          setInput2(response.input2);
+          setOutput2(response.output2);
         }
       } catch (error) {
         console.error('Error fetching matched session:', error);
@@ -74,7 +83,6 @@ const CollaborationServiceIntegratedView: React.FC = () => {
 
   useEffect(() => {
     console.log(`Session ID: ${sessionId}, Topics: ${topics}, Difficulty: ${difficulty}`);
-    console.log(`Question: ${questionId}`);
   }, [sessionId, topics, difficulty, questionId]);
 
   useEffect(() => {
@@ -116,14 +124,18 @@ const CollaborationServiceIntegratedView: React.FC = () => {
   const handleLangChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setLanguage(parseInt(e.target.value));
     setSyntaxFullLang(e.target.textContent!);
-    setSyntaxLang(e.target.value === '63' ? 'javascript'
+    setSyntaxLang(
+      e.target.value === '63' ? 'javascript'
       : e.target.value === '54' ? 'text/x-c++src'
-        : e.target.value === '50' ? 'text/x-csrc'
-          : e.target.value === '71' ? 'python'
-            : e.target.value === '62' ? 'text/x-java'
-              : e.target.value === '83' ? 'swift'
-                : 'javascript');
-  }
+      : e.target.value === '50' ? 'text/x-csrc'
+      : e.target.value === '71' ? 'python'
+      : e.target.value === '62' ? 'text/x-java'
+      : e.target.value === '72' ? 'ruby'
+      : e.target.value === '51' ? 'text/x-csharp'    // New language
+      : e.target.value === '78' ? 'text/x-kotlin'    // New language
+      : 'javascript'
+    );
+  };
 
   const handleRunCode = async () => {
     try {
@@ -187,24 +199,27 @@ const CollaborationServiceIntegratedView: React.FC = () => {
     }
   };
 
-  const handleAssesCode = async () => {
+  const handleAssessCode = async () => {
     try {
       if (!yText) {
         console.error('Error: Yjs text instance is not available');
-        setCommentOutput('Error: Yjs text instance is not available');
+        setOutput('Error: Yjs text instance is not available');
         return;
       }
+
+      setOutput('Waiting for code assessment...');
 
       const currentCode = yText.toString();
       const questionInput = "1: Question - " + questionTitle + "\n" + "2: Description" + questionDescription + "\n";
       const codeAttempt = "3: Code attempt in - " + syntaxFullLang + "\n" + currentCode;
       const inputString = questionInput + codeAttempt;
-      const responseContent = await assesCode(inputString);
+      const responseContent = await assessCode(inputString);
       //setCommentOutput(responseContent);
+      console.log(responseContent)
       setOutput(responseContent)
     } catch (error) {
       console.error('Error executing OpenAI API call:', error);
-      setCommentOutput('Error executing code');
+      setOutput('Error executing code');
     }
   };
 
@@ -212,8 +227,7 @@ const CollaborationServiceIntegratedView: React.FC = () => {
     <div className="editor-container-parent">
       <div className="editor-header">
         <h3>Collaboration Session</h3>
-        <p>Topics: {topics} | Difficulty: {difficulty}</p>
-        <p>Question: {questionTitle}</p>
+        <p>Topics: {topics} | Difficulty: {difficulty} | Question: {questionTitle}</p>
         <p>Description: {questionDescription}</p>
       </div>
 
@@ -238,11 +252,13 @@ const CollaborationServiceIntegratedView: React.FC = () => {
             >
               <option value="" disabled>Select Language</option> {/* Placeholder option */}
               <option value="63">JavaScript</option>
-              <option value="54">C++</option>
               <option value="50">C</option>
+              <option value="54">C++</option>
+              <option value="51">C#</option>   {/* New language */}
               <option value="71">Python</option>
               <option value="62">Java</option>
-              <option value="83">Swift</option>
+              <option value="72">Ruby</option> {/* New language */}
+              <option value="78">Kotlin</option> {/* New language */}
             </select>
           </div>
         </div>
@@ -253,7 +269,7 @@ const CollaborationServiceIntegratedView: React.FC = () => {
         > Run Code
         </button>
         <button
-          onClick={handleAssesCode}
+          onClick={handleAssessCode}
           className="run-btn"
           style={{ marginBottom: '0px' }}
         > Assess Code
@@ -293,7 +309,8 @@ const CollaborationServiceIntegratedView: React.FC = () => {
             }}
           />
         </div>
-        {sessionId && <Chat sessionId={sessionId} />}
+        {sessionId && <Chat sessionId={sessionId.replace("matched on Session ID: ", "")} />}
+
       </div>
 
       <h3 style={{ textAlign: 'left', marginBottom: '5px' }}>Output</h3>
@@ -303,9 +320,65 @@ const CollaborationServiceIntegratedView: React.FC = () => {
       </div>
       {/*<div className="comments-container"style={{ width: '900px', textAlign: 'left', border: '1px solid #ddd', padding: '10px', borderRadius: '5px', backgroundColor: '#f9f9f9', overflowY: 'scroll'}}>
         <pre style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}>{commentoutput}</pre>
-      </div>*/}
-    </div >
-  );
+      </div> */}
+
+  <div className="testcases-table">
+    <h3>Test Cases</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Input 1</th>
+          <th>Output 1</th>
+          <th>Input 2</th>
+          <th>Output 2</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>{input1}</td>
+          <td>{output1}</td>
+          <td>{input2}</td>
+          <td>{output2}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+      </div >
+    );
 };
 
 export default CollaborationServiceIntegratedView;
+
+/** Sample code snippets in different languages for testing */
+/** TO BE USED FOR INTERNAL TESTING WHERE REQUIRED */
+/*
+KOTLIN
+fun greet(name: String) {
+    println("Hello, $name!")
+}
+
+fun main() {
+    greet("World")
+}
+
+
+C#
+using System;
+
+class Program {
+    static void Greet(string name) {
+        Console.WriteLine("Hello, " + name + "!");
+    }
+
+    static void Main() {
+        Greet("World");
+    }
+}
+
+RUBY
+def greet(name)
+  puts "Hello, #{name}!"
+end
+
+greet("World")
+*/

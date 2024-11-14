@@ -1,20 +1,74 @@
 #root {
-  max-width: 1280px;
   margin: 0 auto;
   padding: 5rem;
   text-align: center;
   background-color: white;
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color-scheme: light dark;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Global Styling */
 body {
   background-color: white;
   color: black;
+  display: flex;
+  place-items: center;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+a {
+  font-weight: 500;
+  color: #646cff;
+  text-decoration: inherit;
+}
+a:hover {
+  color: #535bf2;
+}
+
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #1a1a1a;
+  cursor: pointer;
+  color: white;
+  transition: border-color 0.25s;
+}
+button:hover {
+  border-color: #646cff;
+}
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
+  }
+  a:hover {
+    color: #747bff;
+  }
+  button {
+    background-color: #f9f9f9;
+  }
 }
 
 h1 {
   font-size: 32px;
   color: black;
+  line-height: 1.1;
 }
 
 h2 {
@@ -22,12 +76,29 @@ h2 {
   color: black;
 }
 
-
-/* Container uses flexbox for split layout */
+/* Container uses flexbox for split layout
 .container {
   display: flex;
   justify-content: space-between;
-  gap: 20px;  /* Add a gap between the left and right panels */
+  gap: 20px;
+} */
+
+.question-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.login-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.signup-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
 }
 
 /* Left panel for form and question list, using grid */
@@ -81,6 +152,14 @@ h2 {
   vertical-align: top;
   text-align: left;
   box-sizing: border-box;
+  word-wrap: break-word;
+  white-space: normal;
+}
+
+@media screen and (max-width: 768px) {
+  .question-table th, .question-table td {
+    font-size: 11px; /* Reduce font size for smaller screens */
+  }
 }
 
 .question-table tr:hover {
@@ -503,9 +582,17 @@ h2 {
   height: 85vh; /* Full height of the viewport */
   width: 80vw; /* Full width of the viewport */
   
+  overflow-y: scroll;
+  overflow-x: hidden;
   background-color: white;
   padding: 20px;
   box-sizing: border-box; /* Include padding in width and height calculations */
+  scrollbar-width: none;
+}
+
+/* Hide scrollbar for Webkit browsers (Chrome, Safari) */
+.editor-container-parent::-webkit-scrollbar {
+  display: none;
 }
 
 .CodeMirror {
@@ -518,7 +605,8 @@ h2 {
   width: 100%;
   height: 100%;
   max-width: 900px;
-  min-height: 300px;
+  max-height: 200px;
+  min-height: 200px;
   flex-grow: 1;
   position: relative;
 }
@@ -527,7 +615,8 @@ h2 {
   width: 70%;
   height: 100%;
   max-width: 900px;
-  min-height: 300px;
+  max-height: 200px;
+  min-height: 200px;
   flex-grow: 1;
   border: 2px solid #ccc;
   border-radius: 10px;
@@ -541,11 +630,23 @@ h2 {
   vertical-align: top; /* Ensures text starts from the top */
 }
 
+/* Hide scrollbar for Webkit browsers (Chrome, Safari) */
+.editor-container::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for Firefox */
+.editor-container {
+  scrollbar-width: none; /* Firefox */
+}
+
 .chat-box {
   width: 30%;
   display: flex;
   flex-direction: column;
   height: 100%;
+  max-height: 200px;
+  min-height: 100px;
   border: 2px solid #ccc;
   border-radius: 10px;
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
@@ -623,7 +724,7 @@ input {
 .editor-header {
   text-align: center;
   margin-bottom: -10px;
-  margin-top: -60px;
+  margin-top: -45px;
 }
 
 .leave-btn,
@@ -692,13 +793,13 @@ input {
   display: flex;
   flex-direction: row; /* Arrange items in a vertical stack */
   align-items: center; /* Align items to the left */
-  gap: 100px; /* Add vertical spacing between items */
+  gap: 60px; /* Add vertical spacing between items */
 }
 
 .matching-form2 {
   padding: 0px;
   max-width: 40%;
-  min-width: 10%;
+  min-width: 18%;
   margin: 0 auto; /* Center the form */
   border-radius: 10px; /* Rounded corners for the form */
   background-color: white; 
@@ -774,4 +875,45 @@ input {
 
 .output-container{
   overflow-y: scroll;
+  min-height: 50px;
+  max-height: 100px;
+  max-width: 900px;
+}
+
+/* Hide scrollbar for Webkit browsers (Chrome, Safari) */
+.output-container::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for Firefox */
+.output-container {
+  scrollbar-width: none; /* Firefox */
+}
+
+.testcases-table {
+  margin: 20px auto; /* Center the table horizontally */
+  max-width: 900px; /* Set max width */
+  width: 100%; /* Allow the table to expand to max-width */
+}
+
+.testcases-table table {
+  border-collapse: collapse;
+  border: 2px solid #333 !important; /* Outer border around the table */
+  text-align: center;
+  width: 100%; /* Ensure the table fills the container width */
+}
+
+
+.testcases-table th, .testcases-table td {
+  border: 1px solid #333 !important; /* Border around each cell */
+  padding: 8px;
+}
+
+.testcases-table th {
+  background-color: #f2f2f2;
+  font-weight: bold;
+}
+
+.testcases-table td {
+  background-color: #fff;
 }

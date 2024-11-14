@@ -37,7 +37,7 @@ const Login = () => {
     };
 
     return (
-      <div className="container">
+      <div className="login-container">
         <div className="login-form">
           <h2>Login</h2>
           <div className="form-section">
@@ -68,19 +68,6 @@ const Login = () => {
             Don't have an account?
             <p><Link to="/signup" className="link">Sign up here</Link></p>
           </p>
-  
-          <button
-            onClick={() => navigate("/questions")}
-            className="alt-btn"
-          >
-            Go to Question Management
-          </button>
-          <button
-            onClick={() => navigate("/collabFull/" + topic + "/" + difficulty + "/" + questionId + "/" + sessionId)}
-            className="alt-btn"
-          >
-            Go to Collab Stub
-          </button>
         </div>
       </div>
     );
